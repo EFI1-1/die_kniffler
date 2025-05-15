@@ -3,41 +3,50 @@ from .player import Player
 from .dice import Dice
 
 class Game:
-    def __init__(self):
-        self.players: List[Player] = [Player("Jean"), Player("John")] # if only one player then use ai
-        self.dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
+    dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
+    players: List[Player] = []
+    bot: Player = None
+
+    def menu(self):
+        # Anzahl an Spieler nachfragen
+        print("------------KNIFFEL MENU------------")
+        while True:
+            user_input = input("Anzahl Spieler (1-4): ")
+            try:
+                number = int(user_input)
+                if number == 69:
+                    print("Nice. Aber nicht richtig.")
+                if 1 <= number <= 4:
+                    break  # Exit loop if conversion succeeds
+                print("Zahl muss zwischen 1 und 4 sein.")
+            except ValueError:
+                print("Bitte eine Zahl eingeben.")
+        for i in range(1, number + 1):
+            self.players.append(Player(f"Player {i}"))
+        print("------------------------------------")
 
     def start(self):
-        # Theres Like 12 Rounds in one Game for each of the player.scores properties therse one round
-        for i in range(0,12,1):
-            self.newround()
+        print("-------------GAME START-------------")
+        for i in range(1,13):
+            print(f"ROUND {i}")
+            self.round()
+            print("")
 
-    def newround(self):
-        if len(self.players) > 1:
-            # multiplayer mode
-            for i in self.players:
-                self.newturn(i)
-            return
-        else:
-            return
+    def round(self):
+        for player in self.players:
+            self.turn(player)
+            print("")
 
-    def newturn(self, player):
-        print(f"It is your Turn {player.name}")
-        rollcount = 1
-        txt = "Your Dices rolled: "
-        for a in self.dices:
-            a.roll()
-            txt += str(a.value)
-        print(txt)
-        while rollcount < 3:
-            choice = input("Do you want to Reroll all of them? (y/n)")
-            if choice == "y":
-                txt = "Your Dices rolled: "
-                for a in self.dices:
-                    a.roll()
-                    txt += str(a.value)
-                print(txt)
-            elif choice == "n":
-                return
-            rollcount += 1
+    def turn(self, player):
+        # einfach ändern das alles 3 mal wiederholt wird
+        throws = 1
+        keeping = ""
+        while throws < 3:
+            dicevals = ""
+            for a in self.dices:
+                a.roll()
+                dicevals += str(a.value)
+            print(f"{player.name}'s Turn. Dices: {dicevals}")
+            choice = input("Type those you want to keep: ")
+            dicevals += 1
         return
