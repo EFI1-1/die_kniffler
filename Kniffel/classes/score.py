@@ -9,5 +9,6 @@ class Score:
         bonus: (int, bool) = (35, False)
         threeofakind: int = 0
         fourofakind: int = 0
+        chance: int = 0
         yathzee: int = 0
         total: int = 0
