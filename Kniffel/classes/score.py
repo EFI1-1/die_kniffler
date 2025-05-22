@@ -11,3 +11,13 @@ class Score:
     chance: int = 0
     yathzee: int = 0
     total: int = 0
+
+
+    #checks ones to sixes and returns the points
+    def checklower(self, diceroll, number):
+        digits = [int(d) for d in str(diceroll)]
+        counter = 0
+        for i in digits:
+            if i == number:
+                counter += 1
+        return counter * number
