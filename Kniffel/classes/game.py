@@ -1,52 +1,89 @@
+import pygame
 from typing import List
-from .player import Player
 from .dice import Dice
+from .player import Player
+from .button import Button
+from .score import Score
+
+# INITALIZE
+pygame.init()
+
+# CONSTANTS
+WIDTH = 800
+HEIGHT = 800
+
+# COLORS
+GREEN = (34, 177, 76) # background
+WHITE = (255, 255, 255) # dice, score, button background
+BLACK = (0, 0, 0) # text etc.
+
+# INITALIZE SCREEN
+screen = pygame.display.set_mode((WIDTH, HEIGHT)) # rendered das window
+pygame.display.set_caption("Kniffel") # setzt den window namen auf Kniffel
+font = pygame.font.SysFont(None, 30)
 
 class Game:
-    dices: List[Dice] = [Dice(), Dice(), Dice(), Dice(), Dice()]
-    players: List[Player] = []
-    bot: Player = None
+    def __init__(self):
+        self.players: List[Player] = [
+            Player("Player 1"),
+            Player("Player 2")
+        ]
+        self.dices: List[Dice] = [
+            Dice(50, 150, (50, 50), screen),
+            Dice(150, 150, (50, 50), screen),
+            Dice(250, 150, (50, 50), screen),
+            Dice(350, 150, (50, 50), screen),
+            Dice(450, 150, (50, 50), screen)
+        ]
+        self.button = Button(50, 50, 200, 100,"Button",screen, font)
+        self.game_over = False
+        self.rolls_left = 3
 
-    def menu(self):
-        # Anzahl an Spieler nachfragen
-        print("------------KNIFFEL MENU------------")
-        while True:
-            user_input = input("Anzahl Spieler (1-4): ")
-            try:
-                number = int(user_input)
-                if number == 69:
-                    print("Nice. Aber nicht richtig.")
-                if 1 <= number <= 4:
-                    break  # Exit loop if conversion succeeds
-                print("Zahl muss zwischen 1 und 4 sein.")
-            except ValueError:
-                print("Bitte eine Zahl eingeben.")
-        for i in range(1, number + 1):
-            self.players.append(Player(f"Player {i}"))
-        print("------------------------------------")
+    def roll_dice(self):
+        if self.rolls_left > 0:
+            for die in self.dices:
+                die.roll()
+            self.rolls_left -= 1
 
-    def start(self):
-        print("-------------GAME START-------------")
-        for i in range(1,13):
-            print(f"ROUND {i}")
-            self.round()
-            print("")
+    def draw(self):
+        screen.fill(WHITE)
 
-    def round(self):
-        for player in self.players:
-            self.turn(player)
-            print("")
+        # Draw dice
+        for die in self.dices:
+            die.draw()
 
-    def turn(self, player):
-        # einfach ändern das alles 3 mal wiederholt wird
-        throws = 1
-        keeping = ""
-        while throws < 3:
-            dicevals = ""
-            for a in self.dices:
-                a.roll()
-                dicevals += str(a.value)
-            print(f"{player.name}'s Turn. Dices: {dicevals}")
-            choice = input("Type those you want to keep: ")
-            dicevals += 1
-        return
+        # Draw Roll Button
+        self.button.draw()
+
+        # Display remaining rolls
+        rolls_text = font.render(f"Rolls left: {self.rolls_left}", True, BLACK)
+        screen.blit(rolls_text, (WIDTH - 200, 20))
+
+        pygame.display.update()
+
+    def check_click(self, pos):
+        if self.button.is_clicked(pos):
+            if self.rolls_left > 0:
+                self.roll_dice()
+        else:
+            # Check if any dice were clicked for selection
+            for die in self.dices:
+                die.toggle(pos)
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            self.check_click(event.pos)
+
+    def mainloop(self):
+        clock = pygame.time.Clock()
+        while not self.game_over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.game_over = True
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for die in self.dices:
+                        die.toggle(event.pos)
+                self.handle_event(event)
+
+            self.draw()
+            clock.tick(30)
